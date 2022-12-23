@@ -1,15 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
 :root {
-  --font-mono: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
-    "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
-    "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+  font-family: "Inter", monospace;
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+
+  font-size: 62.5%;
 }
 
 body {
   background-color: #dddddd;
+}
+
+.error {
+  position: absolute;
+  bottom: 10px;
+  padding: 5px;
+
+  border-radius: 5px;
+  background-color: #fff;
+  color: rgb(235, 10, 10);
+}
+
+.error p {
+  font-size: 1.5rem;
+  font-weight: 700;
 }

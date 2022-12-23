@@ -1,10 +1,111 @@
 .main {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  gap: 3rem;
+
   min-height: 100vh;
 }
 
-.description video {
-  width: 90vw;
+.video {
+  width: 586px;
+  height: 330px;
+}
+
+.playlist {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  height: 330px;
+  width: 300px;
+  overflow: scroll;
+}
+
+.buttonsArea {
+  display: flex;
+}
+
+.input,
+.button,
+.buttonActive {
+  font-family: "Inter";
+  font-size: 1rem;
+
+  padding: 5px;
+
+  border: none;
+  border-radius: 5px;
+}
+
+.input {
+  margin-left: 10px;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.button,
+.buttonActive {
+  margin-left: 5px;
+  cursor: pointer;
+
+  color: #fff;
+}
+
+.button {
+  background-color: #000;
+}
+
+.buttonActive {
+  background-color: rgb(88, 88, 88);
+}
+
+.playlistVideo {
+  display: flex;
+  gap: 0.5rem;
+
+  cursor: pointer;
+}
+
+.playlistVideo img {
+  width: 170px;
+  height: 90px;
+}
+
+.description h3 {
+  font-size: 1rem;
+
+  max-height: 50px;
+  width: 100px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.description p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+@media only screen and (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+
+  .playlist {
+    width: 586px;
+  }
+}
+
+@media only screen and (max-width: 320px) {
+  .video {
+    width: 90vw;
+    height: 330px;
+  }
+
+  .playlist {
+    width: 90vw;
+  }
 }

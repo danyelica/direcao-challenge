@@ -1,18 +1,38 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "../styles/Home.module.css";
 import requestVideos from "../utils/requests";
 
 export default function Home() {
+  const [search, setSearch] = useState("Animais");
+  const [openSearch, setOpenSearch] = useState(false);
   const [video, setVideo] = useState(0);
+  const [videos, setVideos] = useState([]);
+  const [error, setError] = useState(null);
+  const input = useRef("");
 
   useEffect(() => {
-    pegandoVideo();
-  });
+    searchingVideos(search);
+  }, []);
 
-  async function pegandoVideo() {
-    const response = await requestVideos("Cats", 1);
-    return setVideo(response.videos[0].video_files[1].link);
+  async function searchingVideos(query) {
+    try {
+      const response = await requestVideos(query, 10);
+      setVideo(response.items[0].id.videoId);
+      return setVideos(response.items);
+    } catch (error) {
+      setError(error);
+    }
+  }
+
+  function handleSearchButton() {
+    if (!openSearch) {
+      return setOpenSearch(true);
+    }
+
+    searchingVideos(input.current.value);
+    setSearch(input.current.value);
+    return (input.current.value = "");
   }
   return (
     <>
@@ -23,8 +43,97 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div className={styles.description}>
-          <video src={video} controls />
+          <iframe
+            src={"https://www.youtube.com/embed/" + video}
+            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+            allowfullscreen
+            className={styles.video}
+          />
         </div>
+        <div className={styles.playlist}>
+          <div className={styles.buttonsArea}>
+            {openSearch ? (
+              <div>
+                <button
+                  className={styles.button}
+                  onClick={() => {
+                    setOpenSearch(false);
+                  }}
+                >
+                  X
+                </button>
+                <input type='text' ref={input} className={styles.input} />
+              </div>
+            ) : (
+              <div>
+                <button className={styles.buttonActive}>{search}</button>
+                {"Animais" !== search && (
+                  <button
+                    className={styles.button}
+                    onClick={() => {
+                      setSearch("Animais");
+                      return searchingVideos();
+                    }}
+                  >
+                    Animais
+                  </button>
+                )}
+                {"Cachorros" != search && (
+                  <button
+                    className={styles.button}
+                    onClick={() => {
+                      setSearch("Cachorros");
+                      return searchingVideos("Cachorros");
+                    }}
+                  >
+                    Cachorros
+                  </button>
+                )}
+                {"Gatos" != search && (
+                  <button
+                    className={styles.button}
+                    onClick={() => {
+                      setSearch("Gatos");
+                      return searchingVideos("Gatos");
+                    }}
+                  >
+                    Gatos
+                  </button>
+                )}
+              </div>
+            )}
+            <button
+              className={styles.button}
+              onClick={() => handleSearchButton()}
+            >
+              Pesquisar
+            </button>
+          </div>
+          {videos.map((item) => (
+            <div
+              className={styles.playlistVideo}
+              onClick={() => setVideo(item.id.videoId)}
+            >
+              <img src={item.snippet.thumbnails.medium.url} />
+              <div className={styles.description}>
+                <h3>{item.snippet.title}</h3>
+                <p>{item.snippet.channelTitle}</p>
+                <p>
+                  {new Date(item.snippet.publishTime).toLocaleString("pt-BR", {
+                    year: "numeric",
+                    month: "numeric",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        {error && (
+          <div className='error'>
+            <p>{error}</p>
+          </div>
+        )}
       </main>
     </>
   );
