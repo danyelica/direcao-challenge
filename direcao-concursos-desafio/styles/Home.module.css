@@ -12,6 +12,55 @@
   height: 330px;
 }
 
+.icons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+
+  background-color: antiquewhite;
+}
+
+.icon {
+  height: 30px;
+  width: 30px;
+
+  cursor: pointer;
+}
+
+.volume {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  top: -8.5rem;
+  left: 32%;
+  height: 50px;
+  width: 10px;
+
+  background-color: antiquewhite;
+  border-radius: 10px;
+}
+
+.volumeBar {
+  height: 40px;
+  width: 5px;
+
+  background-color: #000;
+  border-radius: 10px;
+}
+
+.ball {
+  position: relative;
+  top: 0;
+
+  height: 5px;
+  width: 5px;
+
+  background-color: rgb(254, 122, 122);
+  border-radius: 50%;
+}
+
 .playlist {
   display: flex;
   flex-direction: column;
@@ -20,6 +69,21 @@
   height: 330px;
   width: 300px;
   overflow: scroll;
+}
+
+.playlist h3 {
+  font-size: 1rem;
+
+  max-height: 50px;
+  width: 100px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlist p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
 }
 
 .buttonsArea {
@@ -72,21 +136,6 @@
 .playlistVideo img {
   width: 170px;
   height: 90px;
-}
-
-.description h3 {
-  font-size: 1rem;
-
-  max-height: 50px;
-  width: 100px;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.description p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
 }
 
 @media only screen and (max-width: 768px) {

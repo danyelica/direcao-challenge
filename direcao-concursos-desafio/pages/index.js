@@ -1,27 +1,88 @@
 import Head from "next/head";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import PlayIcon from "../public/assets/icons/play-icon.svg";
+import StopIcon from "../public/assets/icons/stop-icon.svg";
+import PauseIcon from "../public/assets/icons/pause-icon.svg";
+import SoundOnIcon from "../public/assets/icons/sound-icon.svg";
+import SoundPlusIcon from "../public/assets/icons/sound-plus-icon.svg";
+import SoundMinusIcon from "../public/assets/icons/sound-minus-icon.svg";
+import SoundOffIcon from "../public/assets/icons/sound-off-icon.svg";
+import FullScreenIcon from "../public/assets/icons/full-screen-icon.svg";
 import styles from "../styles/Home.module.css";
-import requestVideos from "../utils/requests";
+import { currentVideo, requestVideos } from "../utils/requests";
 
 export default function Home() {
   const [search, setSearch] = useState("Animais");
   const [openSearch, setOpenSearch] = useState(false);
-  const [video, setVideo] = useState(0);
+  const [video, setVideo] = useState(
+    "https://rr4---sn-4g5lzney.googlevideo.com/videoplayback?expire=1672028147&ei=k8uoY9OkFdCa1gLax6-ADw&ip=23.88.39.196&id=o-AIhnJuRTPoB964J2QvD1XvP6TlzYpZCCx-DKj2EZ0jiB&itag=22&source=youtube&requiressl=yes&mh=ra&mm=31%2C26&mn=sn-4g5lzney%2Csn-f5f7kn7z&ms=au%2Conr&mv=m&mvi=4&pl=25&initcwndbps=338750&vprv=1&svpuc=1&mime=video%2Fmp4&ratebypass=yes&dur=1352.864&lmt=1650845570431276&mt=1672006152&fvip=5&fexp=24001373%2C24007246&c=ANDROID&txp=4532434&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cvprv%2Csvpuc%2Cmime%2Cratebypass%2Cdur%2Clmt&sig=AOq0QJ8wRQIgTgPjlTn__BWoQgkfZtx_B68n5Py8qH1BjWiz49NrujoCIQCyoO3actCX07p373nsOMLxdQKPCos7d1k2gvp1wmQYVA%3D%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRAIgajlqRdQobcF7Lbf-zpkjbHE7uXLQ1IqzSA2h_SE-hxYCIA-z0YwY2ILOXFNHD5KH3bvUYHhdoYMdNHIYb7OVwHeE"
+  );
+  const [openVolume, setOpenVolume] = useState(false);
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState(null);
   const input = useRef("");
+  const videoRef = useRef("");
+  const ball = useRef("");
 
   useEffect(() => {
-    searchingVideos(search);
+    //searchingVideos(search);
   }, []);
+
+  useEffect(() => {
+    console.log(video);
+  }, [video]);
 
   async function searchingVideos(query) {
     try {
       const response = await requestVideos(query, 10);
-      setVideo(response.items[0].id.videoId);
-      return setVideos(response.items);
+      setVideos(response.items);
+
+      return gettingLink(response.items[0].id.videoId);
     } catch (error) {
       setError(error);
+    }
+  }
+
+  async function gettingLink(id) {
+    try {
+      const data = await currentVideo(id, 10);
+      return setVideo(data.formats[2].url);
+    } catch (error) {
+      setError(error);
+    }
+  }
+
+  function handlePlayer(event) {
+    if (event.target.id === "fullscreen") {
+      return videoRef.current.requestFullscreen();
+    } else if (event.target.id === "play") {
+      return videoRef.current.play();
+    } else if (event.target.id === "pause") {
+      return videoRef.current.pause();
+    } else if (event.target.id === "stop") {
+      videoRef.current.pause();
+      return (videoRef.current.currentTime = 0);
+    } else if (event.target.id === "sound-off") {
+      return (videoRef.current.volume = 0);
+    } else if (event.target.id === "sound-on") {
+      return setOpenVolume(!openVolume);
+    } else if (event.target.id === "plus-volume") {
+      if (videoRef.current.volume >= 0.9) {
+        return (videoRef.current.volume = 1);
+      }
+
+      const currentVolume = Math.floor(ball.current.style.top.slice(0, 2));
+      ball.current.style.top = currentVolume - 15 + "%";
+      return (videoRef.current.volume += 0.15);
+    } else if (event.target.id === "minus-volume") {
+      if (videoRef.current.volume < 0.1) {
+        return (videoRef.current.volume = 0);
+      }
+
+      const currentVolume = Math.floor(ball.current.style.top.slice(0, 2));
+      ball.current.style.top = currentVolume + 15 + "%";
+      return (videoRef.current.volume -= 0.15);
     }
   }
 
@@ -42,13 +103,73 @@ export default function Home() {
         <meta name='viewport' content='width=device-width, initial-scale=1' />
       </Head>
       <main className={styles.main}>
-        <div className={styles.description}>
-          <iframe
-            src={"https://www.youtube.com/embed/" + video}
-            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-            allowFullScreen
-            className={styles.video}
-          />
+        <div>
+          <video src={video} className={styles.video} ref={videoRef} />
+          <div className={styles.icons}>
+            <Image
+              id='sound-on'
+              src={SoundOnIcon.src}
+              width='30'
+              height='30'
+              className={styles.icon}
+              onClick={(event) => handlePlayer(event)}
+            />
+            <Image
+              id='sound-off'
+              src={SoundOffIcon.src}
+              width='30'
+              height='30'
+              className={styles.icon}
+              onClick={(event) => handlePlayer(event)}
+            />
+            <Image
+              id='stop'
+              src={StopIcon}
+              className={styles.icon}
+              onClick={(event) => handlePlayer(event)}
+            />
+            <Image
+              id='play'
+              src={PlayIcon}
+              className={styles.icon}
+              onClick={(event) => handlePlayer(event)}
+            />
+            <Image
+              id='pause'
+              src={PauseIcon.src}
+              width='30'
+              height='30'
+              className={styles.icon}
+              onClick={(event) => handlePlayer(event)}
+            />
+            <Image
+              id='fullscreen'
+              src={FullScreenIcon}
+              className={styles.icon}
+              onClick={(event) => handlePlayer(event)}
+            />
+          </div>
+          {openVolume && (
+            <div>
+              <div className={styles.volume}>
+                <div className={styles.volumeBar}>
+                  <div className={styles.ball} ref={ball} />
+                </div>
+              </div>
+              <img
+                id='minus-volume'
+                src={SoundMinusIcon.src}
+                className='icon-volume'
+                onClick={(event) => handlePlayer(event)}
+              />
+              <img
+                id='plus-volume'
+                src={SoundPlusIcon.src}
+                className='icon-volume'
+                onClick={(event) => handlePlayer(event)}
+              />
+            </div>
+          )}
         </div>
         <div className={styles.playlist}>
           <div className={styles.buttonsArea}>
@@ -112,7 +233,7 @@ export default function Home() {
           {videos.map((item) => (
             <div
               className={styles.playlistVideo}
-              onClick={() => setVideo(item.id.videoId)}
+              onClick={() => gettingLink(item.id.videoId)}
             >
               <img src={item.snippet.thumbnails.medium.url} />
               <div className={styles.description}>
@@ -134,6 +255,27 @@ export default function Home() {
             <p>{error}</p>
           </div>
         )}
+        <style jsx>{`
+          .icon-volume {
+            position: relative;
+            top: -13rem;
+
+            height: 20px;
+            width: 20px;
+
+            cursor: pointer;
+
+            background-color: antiquewhite;
+            border-radius: 10px;
+          }
+
+          #plus-volume {
+            left: 32%;
+          }
+          #minus-volume {
+            left: 27%;
+          }
+        `}</style>
       </main>
     </>
   );
