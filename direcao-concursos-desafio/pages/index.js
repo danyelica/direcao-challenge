@@ -15,14 +15,18 @@ import { currentVideo, requestVideos } from "../utils/requests";
 export default function Home() {
   const [search, setSearch] = useState("Animais");
   const [openSearch, setOpenSearch] = useState(false);
-  const [video, setVideo] = useState(
-    "https://rr4---sn-4g5lzney.googlevideo.com/videoplayback?expire=1672028147&ei=k8uoY9OkFdCa1gLax6-ADw&ip=23.88.39.196&id=o-AIhnJuRTPoB964J2QvD1XvP6TlzYpZCCx-DKj2EZ0jiB&itag=22&source=youtube&requiressl=yes&mh=ra&mm=31%2C26&mn=sn-4g5lzney%2Csn-f5f7kn7z&ms=au%2Conr&mv=m&mvi=4&pl=25&initcwndbps=338750&vprv=1&svpuc=1&mime=video%2Fmp4&ratebypass=yes&dur=1352.864&lmt=1650845570431276&mt=1672006152&fvip=5&fexp=24001373%2C24007246&c=ANDROID&txp=4532434&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cvprv%2Csvpuc%2Cmime%2Cratebypass%2Cdur%2Clmt&sig=AOq0QJ8wRQIgTgPjlTn__BWoQgkfZtx_B68n5Py8qH1BjWiz49NrujoCIQCyoO3actCX07p373nsOMLxdQKPCos7d1k2gvp1wmQYVA%3D%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRAIgajlqRdQobcF7Lbf-zpkjbHE7uXLQ1IqzSA2h_SE-hxYCIA-z0YwY2ILOXFNHD5KH3bvUYHhdoYMdNHIYb7OVwHeE"
-  );
+  const [video, setVideo] = useState({
+    link: "",
+    duration: "00:00",
+  });
   const [openVolume, setOpenVolume] = useState(false);
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState(null);
+  const [pastTimeNumber, setPastTimeNumber] = useState("00:00");
   const input = useRef("");
   const videoRef = useRef("");
+  const timeline = useRef("");
+  const pastTime = useRef("");
   const ball = useRef("");
 
   useEffect(() => {
@@ -30,8 +34,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    console.log(video);
-  }, [video]);
+    formatattingDuration();
+  }, [videoRef]);
 
   async function searchingVideos(query) {
     try {
@@ -47,10 +51,19 @@ export default function Home() {
   async function gettingLink(id) {
     try {
       const data = await currentVideo(id, 10);
-      return setVideo(data.formats[2].url);
+
+      return formatattingDuration(data.lengthSeconds, data.formats[2].url);
     } catch (error) {
       setError(error);
     }
+  }
+
+  function formatattingDuration(durationInSeconds, link) {
+    let newTimer = Math.floor(durationInSeconds);
+    newTimer = Math.floor(newTimer / 60) + ":" + (newTimer % 60);
+    videoRef.current.currentTime = 0;
+    pastTime.current.style.width = 0;
+    setVideo({ link, duration: newTimer });
   }
 
   function handlePlayer(event) {
@@ -86,6 +99,34 @@ export default function Home() {
     }
   }
 
+  function handleTimeline() {
+    let newTimer = Math.floor(videoRef.current.currentTime);
+    newTimer =
+      Math.floor(newTimer / 60)
+        .toString()
+        .padStart(2, "0") +
+      ":" +
+      (newTimer % 60).toString().padStart(2, "0");
+    setPastTimeNumber(newTimer);
+
+    let newWidth = (
+      (videoRef.current.currentTime * 100) /
+      videoRef.current.duration
+    ).toFixed(2);
+    pastTime.current.style.width = newWidth + "%";
+  }
+
+  function handleChangeTime(event) {
+    const fullWidth = timeline.current.getBoundingClientRect().width;
+    const newWidth =
+      ((event.clientX - timeline.current.getBoundingClientRect().x) * 100) /
+      fullWidth;
+    pastTime.current.style.width = newWidth + "%";
+
+    const newTimer = (videoRef.current.duration * newWidth) / 100;
+    videoRef.current.currentTime = newTimer;
+  }
+
   function handleSearchButton() {
     if (!openSearch) {
       return setOpenSearch(true);
@@ -104,50 +145,68 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div>
-          <video src={video} className={styles.video} ref={videoRef} />
-          <div className={styles.icons}>
-            <Image
-              id='sound-on'
-              src={SoundOnIcon.src}
-              width='30'
-              height='30'
-              className={styles.icon}
-              onClick={(event) => handlePlayer(event)}
-            />
-            <Image
-              id='sound-off'
-              src={SoundOffIcon.src}
-              width='30'
-              height='30'
-              className={styles.icon}
-              onClick={(event) => handlePlayer(event)}
-            />
-            <Image
-              id='stop'
-              src={StopIcon}
-              className={styles.icon}
-              onClick={(event) => handlePlayer(event)}
-            />
-            <Image
-              id='play'
-              src={PlayIcon}
-              className={styles.icon}
-              onClick={(event) => handlePlayer(event)}
-            />
-            <Image
-              id='pause'
-              src={PauseIcon.src}
-              width='30'
-              height='30'
-              className={styles.icon}
-              onClick={(event) => handlePlayer(event)}
-            />
-            <Image
-              id='fullscreen'
-              src={FullScreenIcon}
-              className={styles.icon}
-              onClick={(event) => handlePlayer(event)}
-            />
+          <video
+            onTimeUpdate={() => handleTimeline()}
+            src={video.link}
+            className={styles.video}
+            ref={videoRef}
+          />
+          <div
+            className={styles.timelineContainer}
+            onMouseDown={(event) => handleChangeTime(event)}
+          >
+            <div className={styles.timeline} ref={timeline}>
+              <div className={styles.pastTimeline} ref={pastTime} />
+            </div>
+          </div>
+          <div>
+            <div className={styles.icons}>
+              <Image
+                id='sound-on'
+                src={SoundOnIcon.src}
+                width='30'
+                height='30'
+                className={styles.icon}
+                onClick={(event) => handlePlayer(event)}
+              />
+              <Image
+                id='sound-off'
+                src={SoundOffIcon.src}
+                width='30'
+                height='30'
+                className={styles.icon}
+                onClick={(event) => handlePlayer(event)}
+              />
+              <Image
+                id='stop'
+                src={StopIcon}
+                className={styles.icon}
+                onClick={(event) => handlePlayer(event)}
+              />
+              <Image
+                id='play'
+                src={PlayIcon}
+                className={styles.icon}
+                onClick={(event) => handlePlayer(event)}
+              />
+              <Image
+                id='pause'
+                src={PauseIcon.src}
+                width='30'
+                height='30'
+                className={styles.icon}
+                onClick={(event) => handlePlayer(event)}
+              />
+              <Image
+                id='fullscreen'
+                src={FullScreenIcon}
+                className={styles.icon}
+                onClick={(event) => handlePlayer(event)}
+              />
+            </div>
+            <h3 className={styles.time}>
+              {pastTimeNumber}/{video.duration}
+            </h3>
           </div>
           {openVolume && (
             <div>
@@ -159,13 +218,13 @@ export default function Home() {
               <img
                 id='minus-volume'
                 src={SoundMinusIcon.src}
-                className='icon-volume'
+                className={styles.iconVolume}
                 onClick={(event) => handlePlayer(event)}
               />
               <img
                 id='plus-volume'
                 src={SoundPlusIcon.src}
-                className='icon-volume'
+                className={styles.iconVolume}
                 onClick={(event) => handlePlayer(event)}
               />
             </div>
@@ -256,24 +315,21 @@ export default function Home() {
           </div>
         )}
         <style jsx>{`
-          .icon-volume {
-            position: relative;
-            top: -13rem;
-
-            height: 20px;
-            width: 20px;
-
-            cursor: pointer;
-
-            background-color: antiquewhite;
-            border-radius: 10px;
-          }
-
           #plus-volume {
             left: 32%;
           }
           #minus-volume {
             left: 27%;
+          }
+
+          @media only screen and (max-width: 320px) {
+            #plus-volume {
+              left: 12%;
+            }
+
+            #minus-volume {
+              left: 3%;
+            }
           }
         `}</style>
       </main>
