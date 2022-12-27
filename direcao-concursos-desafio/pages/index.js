@@ -30,7 +30,7 @@ export default function Home() {
   const ball = useRef("");
 
   useEffect(() => {
-    //searchingVideos(search);
+    searchingVideos(search);
   }, []);
 
   useEffect(() => {
@@ -293,6 +293,7 @@ export default function Home() {
             <div
               className={styles.playlistVideo}
               onClick={() => gettingLink(item.id.videoId)}
+              key={item.id}
             >
               <img src={item.snippet.thumbnails.medium.url} />
               <div className={styles.description}>
