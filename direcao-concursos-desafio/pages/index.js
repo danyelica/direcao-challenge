@@ -30,7 +30,7 @@ export default function Home() {
   const ball = useRef("");
 
   useEffect(() => {
-    //searchingVideos(search);
+    searchingVideos(search);
   }, []);
 
   useEffect(() => {
