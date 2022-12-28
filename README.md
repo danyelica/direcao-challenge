@@ -1,6 +1,6 @@
 # Front-end Developer Direção Concursos
 
-Esse desafio para a vaga de Front-end Developer da Direção Concursos foi feito usando o [Next.js](https://nextjs.org/docs/getting-started) e consistia em criar um player de vídeo.
+Esse desafio para a vaga de Front-end Developer da Direção Concursos foi feito usando o [Next.js](https://nextjs.org/docs/getting-started) e consistia em criar um player de vídeo. [Aqui](https://direcao-challenge.vercel.app/) o deploy do site.
 
 ## Instalação
 Siga esses passos no terminal para rodar o aplicativo:<br>
